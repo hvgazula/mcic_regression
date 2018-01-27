@@ -24,7 +24,7 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
     Returns:
         None: But puts the resampled *.nii files in a new folder
     """
-    images_files = sorted([
+    image_files = sorted([
         f for f in os.listdir(images_location)
         if os.path.isfile(os.path.join(images_location, f))
     ])
@@ -35,7 +35,7 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
 
-    for image_file in images_files:
+    for image_file in image_files:
         print(image_file)
         (file_name, file_ext) = os.path.splitext(image_file)
         new_file_name = file_name + '_4mm' + file_ext
@@ -50,13 +50,13 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
         resample.run()
 
 
-DataLocation = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
+data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
+mask_location = os.path.join(data_location, 'mask')
+patient_images_location = os.path.join(data_location, 'group1_patients')
+control_images_location = os.path.join(data_location, 'group2_controls')
+
 voxel_size = (4.0, 4.0, 4.0)
 
-mask_location = os.path.join(DataLocation, 'mask')
-Patientimages_location = os.path.join(DataLocation, 'group1_patients')
-Controlimages_location = os.path.join(DataLocation, 'group2_controls')
-
 resample_nifti_images(mask_location, voxel_size, 'NN')
-resample_nifti_images(Patientimages_location, voxel_size, 'Li')
-resample_nifti_images(Controlimages_location, voxel_size, 'Li')
+resample_nifti_images(patient_images_location, voxel_size, 'Li')
+resample_nifti_images(control_images_location, voxel_size, 'Li')

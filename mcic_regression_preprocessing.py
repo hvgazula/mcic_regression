@@ -8,7 +8,6 @@ Created on Thu Jan  4 20:26:52 2018
 """
 import os
 import pickle
-import shelve
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -58,46 +57,43 @@ def extract_demographic_info(folder_string):
     return Demo_Info
 
 
-DIR_FLAG = '/export/mialab'
-
-# %% Head Directory where the data is stored
-PATH_TO_DATA = os.path.join(DIR_FLAG, 'users', 'spanta', 'MCIC_2sample_ttest')
+data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
+mask_location = os.path.join(data_location, 'mask')
+demographics_location = os.path.join(data_location, 'demographics')
+patient_images_location = os.path.join(data_location, 'group1_patients')
+control_images_location = os.path.join(data_location, 'group2_controls')
 
 # %% Mask Location
-Mask = os.path.join(PATH_TO_DATA, 'outputs/outputs_default_options/mask.nii')
-MaskData = nib.load(Mask).get_data()
+mask_file = os.path.join(mask_location, 'mask.nii')
+mask_data = nib.load(mask_file).get_data()
 
 # %% Folder specific to Patients and Controls
-PatientImagesLocation = os.path.join(PATH_TO_DATA, 'group1_patients')
-ControlImagesLocation = os.path.join(PATH_TO_DATA, 'group2_controls')
+patient_images_location = os.path.join(data_location, 'group1_patients')
+control_images_location = os.path.join(data_location, 'group2_controls')
 
 # %% Read Voxel Info into an Array
 print('Extracting Info from NIFTI files')
-PatientData = nifti_to_data(PatientImagesLocation, MaskData)
-ControlData = nifti_to_data(ControlImagesLocation, MaskData)
+patient_data = nifti_to_data(patient_images_location, mask_data)
+control_data = nifti_to_data(control_images_location, mask_data)
 
-voxels = pd.DataFrame(np.vstack((PatientData, ControlData)))
+voxels = pd.DataFrame(np.vstack((patient_data, control_data)))
 
 # %% (Redundant) Read the demographic information
-PatientDemo = extract_demographic_info(
-    os.path.join(PATH_TO_DATA, 'demographics/patients.csv'))
-ControlDemo = extract_demographic_info(
-    os.path.join(PATH_TO_DATA, 'demographics/controls.csv'))
+patient_demographics = extract_demographic_info(
+    os.path.join(demographics_location, 'patients.csv'))
+control_demographics = extract_demographic_info(
+    os.path.join(demographics_location, 'controls.csv'))
 
 # %% Replacing all diagnosis values with either 'patient' or 'control'
-PatientDemo['diagnosis'] = 'Patient'
-ControlDemo['diagnosis'] = 'Control'
+patient_demographics['diagnosis'] = 'Patient'
+control_demographics['diagnosis'] = 'Control'
 
 demographics = pd.concat(
-    [PatientDemo, ControlDemo], axis=0).reset_index(drop=True)
+    [patient_demographics, control_demographics], axis=0).reset_index(drop=True)
 
 # %% write to a file
-print('writing data to a shelve file')
-final_data = shelve.open('final_data')
-final_data['demographics'] = demographics
-final_data['voxels'] = voxels
-final_data.close()
-
 print('writing data to a pickle file')
 with open("final_data.pkl", "wb") as f:
     pickle.dump((demographics, voxels), f)
+
+print('Finished Running Script')
