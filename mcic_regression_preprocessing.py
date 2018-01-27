@@ -6,10 +6,9 @@ Created on Thu Jan  4 20:26:52 2018
 @author: Harshvardhan Gazula
 @notes: Contains code to extract information from the MCIC NIfTI files
 """
-
+import os
 import pickle
 import shelve
-import os
 import nibabel as nib
 import numpy as np
 import pandas as pd

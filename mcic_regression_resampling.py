@@ -13,40 +13,50 @@ import os
 from nipype.interfaces import afni
 
 
-def resample_nifti_images(ImagesLocation):
+def resample_nifti_images(images_location, voxel_dimensions, resample_method):
+    """Resample the NIfTI images in a folder
+    Arguments:
+        images_location: Path where the images are stored
+        voxel_dimension: tuple (dx, dy, dz)
+        resample_method: NN - Nearest neighbor
+                         Li - Linear interpolation
 
-    ImageFiles = sorted([
-        f for f in os.listdir(ImagesLocation)
-        if os.path.isfile(os.path.join(ImagesLocation, f))
+    Returns:
+        None: But puts the resampled *.nii files in a new folder
+    """
+    images_files = sorted([
+        f for f in os.listdir(images_location)
+        if os.path.isfile(os.path.join(images_location, f))
     ])
 
     folder_tag = '_resampled'
-    new_folder = ImagesLocation + folder_tag
+    new_folder = images_location + folder_tag
 
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
 
-    for ImageFile in ImageFiles:
-        resample = afni.Resample()
-        (file_name, file_ext) = os.path.splitext(ImageFile)
+    for image_file in images_files:
+        print(image_file)
+        (file_name, file_ext) = os.path.splitext(image_file)
         new_file_name = file_name + '_4mm' + file_ext
-        resample.inputs.in_file = os.path.join(ImagesLocation,
-                                               ImageFile)
+
+        resample = afni.Resample()
+        resample.inputs.environ = {'AFNI_NIFTI_TYPE_WARN': 'NO'}
+        resample.inputs.in_file = os.path.join(images_location, image_file)
         resample.inputs.out_file = os.path.join(new_folder, new_file_name)
-        resample.inputs.voxel_size = (dx, dy, dz)
+        resample.inputs.voxel_size = voxel_dimensions
         resample.inputs.outputtype = 'NIFTI'
-        resample.inputs.resample_mode = 'NN'
-        #    print(resample.cmdline)
+        resample.inputs.resample_mode = resample_method
         resample.run()
 
 
 DataLocation = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
-(dx, dy, dz) = (4.0, 4.0, 4.0)
+voxel_size = (4.0, 4.0, 4.0)
 
-MaskLocation = os.path.join(DataLocation, 'mask')
-PatientImagesLocation = os.path.join(DataLocation, 'group1_patients')
-ControlImagesLocation = os.path.join(DataLocation, 'group2_controls')
+mask_location = os.path.join(DataLocation, 'mask')
+Patientimages_location = os.path.join(DataLocation, 'group1_patients')
+Controlimages_location = os.path.join(DataLocation, 'group2_controls')
 
-resample_nifti_images(MaskLocation)
-resample_nifti_images(PatientImagesLocation)
-resample_nifti_images(ControlImagesLocation)
+resample_nifti_images(mask_location, voxel_size, 'NN')
+resample_nifti_images(Patientimages_location, voxel_size, 'Li')
+resample_nifti_images(Controlimages_location, voxel_size, 'Li')
