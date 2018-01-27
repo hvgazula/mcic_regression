@@ -20,7 +20,8 @@ def resample_nifti_images(ImagesLocation):
         if os.path.isfile(os.path.join(ImagesLocation, f))
     ])
 
-    new_folder = ImagesLocation + '_' + folder_tag
+    folder_tag = '_resampled'
+    new_folder = ImagesLocation + folder_tag
 
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
@@ -41,8 +42,6 @@ def resample_nifti_images(ImagesLocation):
 
 DataLocation = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
 (dx, dy, dz) = (4.0, 4.0, 4.0)
-
-folder_tag = 'resampled'
 
 MaskLocation = os.path.join(DataLocation, 'mask')
 PatientImagesLocation = os.path.join(DataLocation, 'group1_patients')
