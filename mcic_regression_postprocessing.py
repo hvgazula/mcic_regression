@@ -5,7 +5,7 @@ Created on Fri Jan  5 10:52:22 2018
 
 @author: Harshvardhan Gazula
 @notes: Contains code to process the dataframes from each regression
-and put write them to *.nii file format
+        and put write them to *.nii file format
 """
 
 import os
@@ -13,16 +13,13 @@ import shelve
 import nibabel as nib
 import numpy as np
 
-folder_index = input('Enter the Folder Name: ')
-folder_name = '_'.join(('Part', str(folder_index).zfill(2)))
-
-if not os.path.exists(folder_name):
-    folder_name = folder_index
+folder_index = input('Enter the Folder Name to perform postprocessing: ')
+folder_name = folder_index.replace(' ', '_')
 
 # %% Head Directory where the data is stored and loading the mask
-DataStored = '/export/mialab/users/spanta/MCIC_2sample_ttest'
-mask = nib.load(
-    os.path.join(DataStored, 'outputs/outputs_default_options/mask.nii'))
+data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
+mask_location = os.path.join(data_location, 'mask')
+mask = nib.load(mask_location)
 
 # %% Converting the data to NIfTI format
 for file in os.listdir(folder_name):
