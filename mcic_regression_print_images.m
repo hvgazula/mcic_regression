@@ -22,27 +22,11 @@ if exist(fullfile(working_folder, 'MNI152*.nii'), 'file') ~= 2
     system(shell_cmd);
 end
 
-% File Path based on Operating System
-if ispc
-    dirFlag = 'T:';
-    
-    GIFT_Path 	= '/apps/linux-x86/matlab/toolboxes/GroupICATv4.0a';
-    SPM_Path 	= '/apps/linux-x86/matlab/toolboxes/spm12';
-    MCI_Path 	= '/apps/linux-x86/matlab/toolboxes/MCIv4';
-    FNC_Path 	= '/apps/linux-x86/matlab/toolboxes/FncVer2.3/';
-    
-    addpath(genpath(fullfile(dirFlag, GIFT_Path)))
-    addpath(genpath(fullfile(dirFlag, SPM_Path)))
-    addpath(genpath(fullfile(dirFlag, MCI_Path)))
-    addpath(genpath(fullfile(dirFlag, FNC_Path)))
-else
-    dirFlag = '/export';
-end
-
-DataStored = fullfile(dirFlag, '/mialab/users/spanta/MCIC_2sample_ttest');
+data_location = '/export/mialab/users/hgazula/mcic_regression');
+mask_location = fullfile(data_location, 'mask');
 
 % Mask Location
-Mask = fullfile(DataStored, 'outputs/outputs_default_options/mask.nii');
+Mask = fullfile(mask_location, 'mask.nii');
 
 % Extract data relevant to regressors (age and diagnosis)
 diagnosis_files = dir(fullfile(working_folder, 'pvalues_diagnosis_Patient_*.nii'));
