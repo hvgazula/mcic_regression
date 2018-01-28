@@ -14,15 +14,17 @@ from nipype.interfaces import afni
 
 
 def resample_nifti_images(images_location, voxel_dimensions, resample_method):
-    """Resample the NIfTI images in a folder
-    Arguments:
+    """Resample the NIfTI images in a folder and put them in a new folder
+
+    Args:
         images_location: Path where the images are stored
         voxel_dimension: tuple (dx, dy, dz)
         resample_method: NN - Nearest neighbor
                          Li - Linear interpolation
 
     Returns:
-        None: But puts the resampled *.nii files in a new folder
+        None:
+
     """
     image_files = sorted([
         f for f in os.listdir(images_location)
