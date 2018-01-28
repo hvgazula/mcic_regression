@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan  3 15:18:33 2018
+Created on Wed Jan 3 15:18:33 2018
 
 @author: Harshvardhan Gazula
-@notes: Modified on 12/01/2018 to remove sites information and perform
-        centralized regression
+@notes: Modified to remove sites information and perform pooled regression
 """
 
 import os
@@ -17,8 +16,9 @@ import statsmodels.api as sm
 
 pbar = ProgressBar()
 
-folder_index = input('Enter the Folder Index: ')
-folder_name = '_'.join(('Results', str(folder_index).zfill(2)))
+folder_index = input(
+    'Enter the Folder name where you want your results to be saved: ')
+folder_name = folder_index.replace(' ', '_')
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
@@ -46,8 +46,8 @@ pvalues = pd.concat(pvalues, axis=1).T
 tvalues = pd.concat(tvalues, axis=1).T
 rsquared = pd.DataFrame(rsquared, columns=['rsquared_adj'])
 
-# %% write to a file
-print('writing data to a shelve file')
+# %% Writing to a file
+print('Writing data to a shelve file')
 results = shelve.open(os.path.join(folder_name, 'centralized_results'))
 results['params'] = params
 results['pvalues'] = pvalues
