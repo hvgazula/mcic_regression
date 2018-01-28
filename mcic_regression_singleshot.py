@@ -5,34 +5,37 @@ Created on Sat Dec 23 10:12:49 2017
 
 @author: Harshvardhan Gazula
 @notes : Contains a variant of the single-shot regression proposed by Eswar.
-        Drop site specific columns at each site and only use global_beta_vector
-        to calculate SSE at each local site
-@modified:
-    01/14/2018 weighted average single shot regression
+         Drop site specific columns at each site and use global_beta_vector
+         to calculate SSE at each local site.
+@modified: 01/14/2018 weighted average single shot regression
 """
 
 import os
 import pickle
 import shelve
-from progressbar import ProgressBar
 import numpy as np
 import pandas as pd
 import scipy as sp
 import statsmodels.api as sm
+from progressbar import ProgressBar
 
 pbar = ProgressBar()
 
 
 def t_to_p(ts_beta, dof):
     """Returns the p-value for each t-statistic of the coefficient vector
+
     Args:
         dof (int)       : Degrees of Freedom
-                            Given by len(y) - len(beta_vector)
+                          Given by len(y) - len(beta_vector)
         ts_beta (float) : t-statistic of shape [n_features +  1]
+
     Returns:
         p_values (float): of shape [n_features + 1]
+
     Comments:
         t to p value transformation(two tail)
+
     """
     return [2 * sp.stats.t.sf(np.abs(t), dof) for t in ts_beta]
 
@@ -51,14 +54,14 @@ def select_and_drop_cols(site_dummy, site_data):
 
 
 def get_dummies_and_augment(site_X):
-    """Add a constant column and get dummies for categorical values"""
+    """Add a constant column and dummy columns for categorical values"""
     X = pd.get_dummies(site_X, drop_first='True')
     X = sm.add_constant(X, has_constant='add')
     return X
 
 
-folder_index = input('Enter the Folder Index: ')
-folder_name = '_'.join(('Results', str(folder_index).zfill(2)))
+folder_index = input('Enter the name of the folder to save results: ')
+folder_name = folder_index.replace(' ', '_')
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
@@ -72,7 +75,7 @@ site_02 = FinalData[FinalData['site'].str.match('MGH')]
 site_03 = FinalData[FinalData['site'].str.match('UMN')]
 site_04 = FinalData[FinalData['site'].str.match('UNM')]
 
-# send the total number of sites information to each site (Remote)
+# Send the total number of sites information to each site (Remote)
 unique_sites = FinalData['site'].unique()
 unique_sites.sort()
 site_dummy = pd.get_dummies(unique_sites, drop_first=True)
@@ -132,13 +135,13 @@ for voxel in pbar(voxels.columns):
     site4_rsquared.append(model4.rsquared)
     # Additional part can be removed--------------------------
 
-    # PART 02 - Aggregating parameteer values at the remote
-    #    sum_params = model1.params + model2.params + model3.params + model4.params
-    #    avg_beta_vector = sum_params / 4
-
+    # PART 02 - Aggregating parameter values at the remote
     sum_params = [model1.params, model2.params, model3.params, model4.params]
     count_y_local = [len(y1), len(y2), len(y3), len(y4)]
+    # Weighted Average
     avg_beta_vector = np.average(sum_params, weights=count_y_local, axis=0)
+#    # Simple Average
+#    avg_beta_vector = np.average(sum_params, axis=0)  # Simple Average
     params.append(avg_beta_vector)
 
     # PART 03 - SSE at each local site
@@ -221,9 +224,9 @@ site4_pvalues = pd.DataFrame(site4_pvalues, columns=column_names)
 site4_tvalues = pd.DataFrame(site4_tvalues, columns=column_names)
 site4_rsquared = pd.DataFrame(site4_rsquared, columns=['rsquared_adj'])
 
-# %% Write to a file
-print('writing data to a shelve file')
-results = shelve.open(os.path.join(folder_name, 'decentralized_results'))
+# %% Writing to a file
+print('Writing data to a shelve file')
+results = shelve.open(os.path.join(folder_name, 'singleshot_results'))
 results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
