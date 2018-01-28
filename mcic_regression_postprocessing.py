@@ -19,7 +19,7 @@ folder_name = folder_index.replace(' ', '_')
 # %% Head Directory where the data is stored and loading the mask
 data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
 mask_location = os.path.join(data_location, 'mask')
-mask = nib.load(mask_location)
+mask = nib.load(os.path.join(mask_location, 'mask.nii'))
 
 # %% Converting the data to NIfTI format
 for file in os.listdir(folder_name):
