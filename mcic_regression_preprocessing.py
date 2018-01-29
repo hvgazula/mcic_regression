@@ -71,10 +71,6 @@ control_image_files_location = os.path.join(data_location, 'group2_controls')
 mask_file = os.path.join(mask_location, 'mask.nii')
 mask_data = nib.load(mask_file).get_data()
 
-# %% Folder specific to Patients and Controls *.nii files
-patient_image_files_location = os.path.join(data_location, 'group1_patients')
-control_image_files_location = os.path.join(data_location, 'group2_controls')
-
 # %% Reading Voxel Info into an Array
 print('Extracting Info from NIFTI files')
 patient_data = nifti_to_data(patient_image_files_location, mask_data)
