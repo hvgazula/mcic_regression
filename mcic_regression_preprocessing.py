@@ -89,7 +89,8 @@ patient_demographics['diagnosis'] = 'Patient'
 control_demographics['diagnosis'] = 'Control'
 
 demographics = pd.concat(
-    [patient_demographics, control_demographics], axis=0).reset_index(drop=True)
+    [patient_demographics, control_demographics], axis=0).reset_index(
+        drop=True)
 
 # %% Writing to a file
 print('writing data to a pickle file')
