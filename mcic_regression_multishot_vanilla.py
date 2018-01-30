@@ -163,7 +163,7 @@ for voxel in pbar(voxels.columns):
             np.square(grad_remote)) > tol or eta != 0.5e-3:
         flag = 1
 
-    with open(os.path.join(folder_name, 'new_vanilla_output'), 'a')) as fh:
+    with open(os.path.join(folder_name, 'new_vanilla_output'), 'a') as fh:
         fh.write(
             '{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.7f} {:^15.5f} {:^4d} \n'.
             format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
