@@ -107,7 +107,7 @@ def gradient(weights, X, y, lamb=0.0):
 
 params, pvalues, tvalues, rsquared = [], [], [], []
 
-fh = open(os.path.join(folder_name, 'new_vanilla_output', 'w'))
+fh = open(os.path.join(folder_name, 'new_vanilla_output'), 'w')
 fh.write('{:^7s} {:^15s} {:^20s} {:^20s} {:^15s} {:^15s} {:^4s} \n'.format(
     'voxel', 'iterations', 'prev_obj_val', 'curr_obj_val', 'eta', 'grad_norm',
     'flag'))
