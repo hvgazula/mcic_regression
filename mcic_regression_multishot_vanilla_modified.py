@@ -149,9 +149,9 @@ for voxel in pbar(voxels.columns):
 
         wc = wp - eta * grad_remote
 
-        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^15.7f} {:^4d}'.
-          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
-                 np.sum(np.square(grad_remote)), flag))
+#        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^15.7f} {:^4d}'.
+#          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
+#                 np.sum(np.square(grad_remote)), flag))
 
         if curr_obj_remote > prev_obj_remote:  # 11
             eta = np.around(eta - eta * (25 / 100), decimals=4)  # 12
