@@ -112,15 +112,13 @@ def gradient(weights, X, y, lamb=0.0):
 
 params, pvalues, tvalues, rsquared = [], [], [], []
 
-fh = open(os.path.join(folder_name, 'new_vanilla_output'), 'w')
-fh.write('{:^7s} {:^15s} {:^20s} {:^20s} {:^15s} {:^15s} {:^4s} \n'.format(
+fh = open(os.path.join(folder_name, 'vanilla_output_perTol'), 'w')
+fh.write('{:^7s} {:^15s} {:^20s} {:^20s} {:^15s} {:^15s} {:^15s} \n'.format(
     'voxel', 'iterations', 'prev_obj_val', 'curr_obj_val', 'eta', 'grad_norm',
-    'flag'))
+    'percent_tol'))
 fh.close()
 
-#for voxel in pbar(voxels.columns):
-voxel_list = [27]
-for voxel in voxel_list:
+for voxel in pbar(voxels.columns):
     flag = 0
     y1 = site_01_y[voxel]
     y2 = site_02_y[voxel]
@@ -132,13 +130,12 @@ for voxel in voxel_list:
     prev_obj_remote = np.inf
     curr_obj_remote = np.nan
     grad_remote = np.random.rand(X1.shape[1])
-    tol = 1e-5
-    eta = 1e-3
+    tol = 5e-3
+    eta = 0.5e-3
 
     count = 0
-    while not gottol(grad_remote, tol):
-#    while not objtol(prev_obj_remote, curr_obj_remote, tol):
-#        prev_obj_remote = curr_obj_remote
+    while not objtol(prev_obj_remote, curr_obj_remote, tol):
+        prev_obj_remote = curr_obj_remote
         count = count + 1
 
         # At local
@@ -160,13 +157,10 @@ for voxel in voxel_list:
         wc = wp - eta * grad_remote
 
         obj_tol_val = 100 * (prev_obj_remote - curr_obj_remote)/prev_obj_remote
-        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^10.5f} {:^15.7f} {:^4d}'.
-          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
-                 obj_tol_val, np.sum(np.square(grad_remote)), flag))
 
         if objtol(prev_obj_remote, curr_obj_remote):
             break
-        
+
         if curr_obj_remote > prev_obj_remote:  # 11
             eta = np.around(eta - eta * (25 / 100), decimals=4)  # 12
             # start from scratch
@@ -177,21 +171,20 @@ for voxel in voxel_list:
                 break
             continue
         else:  # 13
-#            prev_prev = prev_obj_remote
-            prev_obj_remote = curr_obj_remote
-
+#            prev_obj_remote = curr_obj_remote
             # 9
             wp = wc
-            
-    if curr_obj_remote != prev_obj_remote or np.sum(
-            np.square(grad_remote)) > tol or eta != 0.5e-3:
-        flag = 1
 
-    with open(os.path.join(folder_name, 'new_vanilla_output'), 'a') as fh:
+#    if curr_obj_remote != prev_obj_remote or np.sum(
+#            np.square(grad_remote)) > tol or eta != 0.5e-3:
+#        flag = 1
+
+    obj_tol_val = 100 * (prev_obj_remote - curr_obj_remote)/prev_obj_remote
+    with open(os.path.join(folder_name, 'vanilla_output_perTol'), 'a') as fh:
         fh.write(
-            '{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.7f} {:^15.5f} {:^4d} \n'.
-            format(voxel, count, prev_prev, curr_obj_remote, eta,
-                   np.sum(np.square(grad_remote)), flag))
+            '{:07d} {:^15d} {:^20.5f} {:^20.5f} {:^15.7f} {:^15.5f} {:^15.5f} \n'.
+            format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
+                   np.sum(np.square(grad_remote)), obj_tol_val))
 
     avg_beta_vector = wc
     params.append(avg_beta_vector)
@@ -251,7 +244,7 @@ rsquared = pd.DataFrame(rsquared, columns=['rsquared_adj'])
 
 # %% Write to a file
 print('Writing data to a shelve file')
-results = shelve.open(os.path.join(folder_name, 'vanilla_test'))
+results = shelve.open(os.path.join(folder_name, 'multishot_results_perTol'))
 results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
