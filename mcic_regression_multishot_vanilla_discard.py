@@ -5,7 +5,7 @@ Created on Sat Jan  6 15:52:40 2018
 
 @author: Harshvardhan Gazula
 @notes: Contains multi-shot regression with vanilla gradient descent
-        # modified the code to restart the gradient descent if the learning rate is too high
+
 """
 
 import os
@@ -125,7 +125,7 @@ for voxel in pbar(voxels.columns):
     prev_obj_remote = np.inf
     grad_remote = np.random.rand(X1.shape[1])
     tol = 1e-3  # 0.5e-3
-    eta = 5e-3
+    eta = 0.5e-3
 
     count = 0
     while not gottol(grad_remote, tol):
@@ -149,23 +149,13 @@ for voxel in pbar(voxels.columns):
 
         wc = wp - eta * grad_remote
 
-#        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^15.7f} {:^4d}'.
-#          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
-#                 np.sum(np.square(grad_remote)), flag))
-
         if curr_obj_remote > prev_obj_remote:  # 11
-            eta = np.around(eta - eta * (25 / 100), decimals=4)  # 12
-            # start from scratch
-            wp = np.zeros(X1.shape[1])
-            prev_obj_remote = np.inf
-            grad_remote = np.random.rand(X1.shape[1])
+            eta = eta - eta * (5 / 100)  # 12
             if eta < 10e-10:
                 break
             continue
         else:  # 13
-            prev_prev = prev_obj_remote
             prev_obj_remote = curr_obj_remote
-
             # 9
             wp = wc
 
@@ -176,9 +166,11 @@ for voxel in pbar(voxels.columns):
     with open(os.path.join(folder_name, 'new_vanilla_output'), 'a') as fh:
         fh.write(
             '{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.7f} {:^15.5f} {:^4d} \n'.
-            format(voxel, count, prev_prev, curr_obj_remote, eta,
+            format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
                    np.sum(np.square(grad_remote)), flag))
-
+#    print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.7f} {:^15.5f} {:^4d} \n'.
+#          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
+#                 np.sum(np.square(grad_remote)), flag))
     avg_beta_vector = wc
     params.append(avg_beta_vector)
 
@@ -236,8 +228,8 @@ tvalues = pd.DataFrame(tvalues, columns=X1.columns.tolist())
 rsquared = pd.DataFrame(rsquared, columns=['rsquared_adj'])
 
 # %% Write to a file
-print('Writing data to a shelve file')
-results = shelve.open(os.path.join(folder_name, 'vanilla_test'))
+print('writing data to a shelve file')
+results = shelve.open(os.path.join(folder_name, 'multishot_results_resampled'))
 results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues

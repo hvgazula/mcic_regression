@@ -6,6 +6,7 @@ Created on Sat Jan  6 15:52:40 2018
 @author: Harshvardhan Gazula
 @notes: Contains multi-shot regression with vanilla gradient descent
         # modified the code to restart the gradient descent if the learning rate is too high
+        # using percent tolerance as a stopping criterion
 """
 
 import os
@@ -92,6 +93,10 @@ def gottol(vector, tol=1e-5):
     """Check if the gradient meets the tolerances"""
     return np.sum(np.square(vector)) <= tol
 
+def objtol(val1, val2, tol=1e-5):
+    """Check if the gradient meets the tolerances"""
+    return np.abs((val1 - val2)/val1) <= tol
+
 
 def objective(weights, X, y, lamb=0.0):
     """calculates the Objective function value"""
@@ -113,7 +118,9 @@ fh.write('{:^7s} {:^15s} {:^20s} {:^20s} {:^15s} {:^15s} {:^4s} \n'.format(
     'flag'))
 fh.close()
 
-for voxel in pbar(voxels.columns):
+#for voxel in pbar(voxels.columns):
+voxel_list = [27]
+for voxel in voxel_list:
     flag = 0
     y1 = site_01_y[voxel]
     y2 = site_02_y[voxel]
@@ -123,12 +130,15 @@ for voxel in pbar(voxels.columns):
     # Initialize at remote
     wp = np.zeros(X1.shape[1])
     prev_obj_remote = np.inf
+    curr_obj_remote = np.nan
     grad_remote = np.random.rand(X1.shape[1])
-    tol = 1e-3  # 0.5e-3
-    eta = 5e-3
+    tol = 1e-5
+    eta = 1e-3
 
     count = 0
     while not gottol(grad_remote, tol):
+#    while not objtol(prev_obj_remote, curr_obj_remote, tol):
+#        prev_obj_remote = curr_obj_remote
         count = count + 1
 
         # At local
@@ -149,10 +159,14 @@ for voxel in pbar(voxels.columns):
 
         wc = wp - eta * grad_remote
 
-#        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^15.7f} {:^4d}'.
-#          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
-#                 np.sum(np.square(grad_remote)), flag))
+        obj_tol_val = 100 * (prev_obj_remote - curr_obj_remote)/prev_obj_remote
+        print('{:07d} {:^15d} {:^20.6f} {:^20.6f} {:^15.5f} {:^10.5f} {:^15.7f} {:^4d}'.
+          format(voxel, count, prev_obj_remote, curr_obj_remote, eta,
+                 obj_tol_val, np.sum(np.square(grad_remote)), flag))
 
+        if objtol(prev_obj_remote, curr_obj_remote):
+            break
+        
         if curr_obj_remote > prev_obj_remote:  # 11
             eta = np.around(eta - eta * (25 / 100), decimals=4)  # 12
             # start from scratch
@@ -163,12 +177,12 @@ for voxel in pbar(voxels.columns):
                 break
             continue
         else:  # 13
-            prev_prev = prev_obj_remote
+#            prev_prev = prev_obj_remote
             prev_obj_remote = curr_obj_remote
 
             # 9
             wp = wc
-
+            
     if curr_obj_remote != prev_obj_remote or np.sum(
             np.square(grad_remote)) > tol or eta != 0.5e-3:
         flag = 1
