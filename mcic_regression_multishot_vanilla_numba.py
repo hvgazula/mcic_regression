@@ -18,20 +18,6 @@ import pandas as pd
 import scipy as sp
 import statsmodels.api as sm
 
-#@jit(nopython=True)
-#def t_to_p(ts_beta, dof):
-#    """Returns the p-value for each t-statistic of the coefficient vector
-#    Args:
-#        dof (int)       : Degrees of Freedom
-#                            Given by len(y) - len(beta_vector)
-#        ts_beta (float) : t-statistic of shape [n_features +  1]
-#    Returns:
-#        p_values (float): of shape [n_features + 1]
-#    Comments:
-#        t to p value transformation(two tail)
-#    """
-#    return [2 * sp.stats.t.sf(np.abs(t), dof) for t in ts_beta]
-
 
 def select_and_drop_cols(site_dummy, site_data):
     """Select and crop columns"""
@@ -121,7 +107,7 @@ def gradient(weights, X, y, lamb=0.0):
 @jit(nopython=True)
 def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
                     site_04_y1):
-    size_y = 10
+    size_y = site_01_y1.shape[1]
 
     params = np.zeros((X1.shape[1], size_y))
     tvalues = np.zeros((X1.shape[1], size_y))
@@ -129,6 +115,9 @@ def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
 
     for voxel in prange(size_y):
 #        flag = 0
+        if voxel % 200 == 0:
+            print(voxel)
+
         y1 = site_01_y1[:, voxel]
         y2 = site_02_y1[:, voxel]
         y3 = site_03_y1[:, voxel]
@@ -138,8 +127,8 @@ def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
         wp = np.zeros(X1.shape[1])
         prev_obj_remote = np.inf
         grad_remote = np.random.rand(X1.shape[1])
-        tol = 1e-3  # 0.5e-3
-        eta = 5e-3
+        tol = 1e-4  # 0.5e-3
+        eta = 5e-4
 
         count = 0
         while not gottol(grad_remote, tol):
@@ -249,7 +238,7 @@ rsquared = pd.DataFrame(rsquared.transpose(), columns=['rsquared_adj'])
 
 # %% Write to a file
 print('Writing data to a shelve file')
-results = shelve.open(os.path.join(folder_name, 'vanilla_test_numba'))
+results = shelve.open(os.path.join(folder_name, 'multishot_results_resampled'))
 results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
