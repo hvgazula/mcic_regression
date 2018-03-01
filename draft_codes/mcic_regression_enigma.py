@@ -113,6 +113,28 @@ for voxel in pbar(voxels.columns):
     model3 = sm.OLS(y3, X3.astype(float)).fit()
     model4 = sm.OLS(y4, X4.astype(float)).fit()
 
+    # Additional part can be removed--------------------------
+    site1_params.append(model1.params)
+    site2_params.append(model2.params)
+    site3_params.append(model3.params)
+    site4_params.append(model4.params)
+
+    site1_pvalues.append(model1.pvalues)
+    site2_pvalues.append(model2.pvalues)
+    site3_pvalues.append(model3.pvalues)
+    site4_pvalues.append(model4.pvalues)
+
+    site1_tvalues.append(model1.tvalues)
+    site2_tvalues.append(model2.tvalues)
+    site3_tvalues.append(model3.tvalues)
+    site4_tvalues.append(model4.tvalues)
+
+    site1_rsquared.append(model1.rsquared)
+    site2_rsquared.append(model2.rsquared)
+    site3_rsquared.append(model3.rsquared)
+    site4_rsquared.append(model4.rsquared)
+    # Additional part can be removed--------------------------
+
     # PART 02 - Aggregating parameter values at the remote
     sum_params = [model1.params, model2.params, model3.params, model4.params]
     count_y_local = [len(y1), len(y2), len(y3), len(y4)]
@@ -127,6 +149,11 @@ for voxel in pbar(voxels.columns):
     y2_estimate = np.dot(avg_beta_vector, np.matrix.transpose(X2.as_matrix()))
     y3_estimate = np.dot(avg_beta_vector, np.matrix.transpose(X3.as_matrix()))
     y4_estimate = np.dot(avg_beta_vector, np.matrix.transpose(X4.as_matrix()))
+
+#    y1_estimate = np.dot(model1.params, np.matrix.transpose(X1.as_matrix()))
+#    y2_estimate = np.dot(model2.params, np.matrix.transpose(X2.as_matrix()))
+#    y3_estimate = np.dot(model3.params, np.matrix.transpose(X3.as_matrix()))
+#    y4_estimate = np.dot(model4.params, np.matrix.transpose(X4.as_matrix()))
 
     sse1 = np.linalg.norm(y1 - y1_estimate)**2
     sse2 = np.linalg.norm(y2 - y2_estimate)**2
@@ -177,6 +204,26 @@ pvalues = pd.DataFrame(pvalues, columns=column_names)
 tvalues = pd.DataFrame(tvalues, columns=column_names)
 rsquared = pd.DataFrame(rsquared, columns=['rsquared_adj'])
 
+site1_params = pd.DataFrame(site1_params, columns=column_names)
+site1_pvalues = pd.DataFrame(site1_pvalues, columns=column_names)
+site1_tvalues = pd.DataFrame(site1_tvalues, columns=column_names)
+site1_rsquared = pd.DataFrame(site1_rsquared, columns=['rsquared_adj'])
+
+site2_params = pd.DataFrame(site2_params, columns=column_names)
+site2_pvalues = pd.DataFrame(site2_pvalues, columns=column_names)
+site2_tvalues = pd.DataFrame(site2_tvalues, columns=column_names)
+site2_rsquared = pd.DataFrame(site2_rsquared, columns=['rsquared_adj'])
+
+site3_params = pd.DataFrame(site3_params, columns=column_names)
+site3_pvalues = pd.DataFrame(site3_pvalues, columns=column_names)
+site3_tvalues = pd.DataFrame(site3_tvalues, columns=column_names)
+site3_rsquared = pd.DataFrame(site3_rsquared, columns=['rsquared_adj'])
+
+site4_params = pd.DataFrame(site4_params, columns=column_names)
+site4_pvalues = pd.DataFrame(site4_pvalues, columns=column_names)
+site4_tvalues = pd.DataFrame(site4_tvalues, columns=column_names)
+site4_rsquared = pd.DataFrame(site4_rsquared, columns=['rsquared_adj'])
+
 # %% Writing to a file
 print('Writing data to a shelve file')
 results = shelve.open(os.path.join(folder_name, 'singleshot_results'))
@@ -184,4 +231,24 @@ results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
 results['rsquared'] = rsquared
+
+results['site1_params'] = site1_params
+results['site1_pvalues'] = site1_pvalues
+results['site1_tvalues'] = site1_tvalues
+results['site1_rsquared'] = site1_rsquared
+
+results['site2_params'] = site2_params
+results['site2_pvalues'] = site2_pvalues
+results['site2_tvalues'] = site2_tvalues
+results['site2_rsquared'] = site2_rsquared
+
+results['site3_params'] = site3_params
+results['site3_pvalues'] = site3_pvalues
+results['site3_tvalues'] = site3_tvalues
+results['site3_rsquared'] = site3_rsquared
+
+results['site4_params'] = site4_params
+results['site4_pvalues'] = site4_pvalues
+results['site4_tvalues'] = site4_tvalues
+results['site4_rsquared'] = site4_rsquared
 results.close()

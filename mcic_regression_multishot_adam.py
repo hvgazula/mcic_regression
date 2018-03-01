@@ -10,7 +10,7 @@ import numpy as np
 import scipy as sp
 import os
 import pandas as pd
-from preprocess import read_data
+from preprocess import load_data
 
 folder_index = input('Enter the name of the folder to save results: ')
 folder_name = folder_index.replace(' ', '_')
@@ -145,7 +145,7 @@ def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
     return (params, tvalues, rsquared, dof_global)
 
 
-X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = read_data(
+X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = load_data(
 )
 
 (params, tvalues, rsquared, dof_global) = multishot_numba(

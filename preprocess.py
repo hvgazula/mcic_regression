@@ -31,7 +31,7 @@ def get_dummies_and_augment(site_X):
     return X
 
 
-def read_data():
+def load_data():
 
     with open("final_data.pkl", "rb") as f:
         demographics, voxels = pickle.load(f)
