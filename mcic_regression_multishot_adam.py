@@ -33,7 +33,7 @@ def gradient(weights, X, y, lamb=0.0):
 
 
 @jit(nopython=True)
-def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
+def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
                     site_04_y1):
 
     size_y = site_01_y1.shape[1]
@@ -148,7 +148,7 @@ if not os.path.exists(folder_name):
 X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = load_data(
 )
 
-(params, tvalues, rsquared, dof_global) = multishot_numba(
+(params, tvalues, rsquared, dof_global) = multishot_gd(
     X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1)
 
 ps_global = 2 * sp.stats.t.sf(np.abs(tvalues), dof_global)

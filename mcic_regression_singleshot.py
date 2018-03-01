@@ -98,7 +98,6 @@ def singleshot_regression(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
         ts_global = avg_beta_vector / se_beta_global
 
         tvalues[:, voxel] = ts_global
-        dof_global = 0
 
     return (params, tvalues, rsquared, dof_global)
 
