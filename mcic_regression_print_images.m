@@ -22,7 +22,7 @@ if exist(fullfile(working_folder, 'MNI152*.nii'), 'file') ~= 2
     system(shell_cmd);
 end
 
-data_location = '/export/mialab/users/hgazula/mcic_regression');
+data_location = '/export/mialab/users/hgazula/mcic_regression';
 mask_location = fullfile(data_location, 'mask');
 
 % Mask Location
@@ -34,7 +34,7 @@ age_files 		= dir(fullfile(working_folder, 'pvalues_age_*.nii'));
 sex_files 		= dir(fullfile(working_folder, 'pvalues_sex_*.nii'));
 
 % Add function:export_fig to the path
-addpath(fullfile(dirFlag,'mialab','users','eswar','software','export_fig'));
+addpath('/export/mialab/users/eswar/software/export_fig');
 
 % Printing Images
 print_images(diagnosis_files, template_file, Mask, working_folder)
