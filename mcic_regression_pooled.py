@@ -22,7 +22,7 @@ folder_name = folder_index.replace(' ', '_')
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
-with open("final_data.pkl", "rb") as f:
+with open("final_data_resampled.pkl", "rb") as f:
     demographics, voxels = pickle.load(f)
 
 demographics.drop('site', axis=1, inplace=True)

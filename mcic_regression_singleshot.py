@@ -152,7 +152,7 @@ for voxel in pbar(voxels.columns):
 
     # PART 05 - Finding rsquared (global)
     SSE_global = sse1 + sse2 + sse3 + sse4
-    SST_global = sst1 + sst3 + sst3 + sst4
+    SST_global = sst1 + sst2 + sst3 + sst4
     r_squared_global = 1 - (SSE_global / SST_global)
     rsquared.append(r_squared_global)
 

@@ -12,11 +12,6 @@ import os
 import pandas as pd
 from preprocess import load_data
 
-folder_index = input('Enter the name of the folder to save results: ')
-folder_name = folder_index.replace(' ', '_')
-if not os.path.exists(folder_name):
-    os.makedirs(folder_name)
-
 
 @jit(nopython=True)
 def gottol(vector, tol=1e-5):
@@ -144,6 +139,11 @@ def multishot_numba(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
         tvalues[:, voxel] = ts_global
     return (params, tvalues, rsquared, dof_global)
 
+
+folder_index = input('Enter the name of the folder to save results: ')
+folder_name = folder_index.replace(' ', '_')
+if not os.path.exists(folder_name):
+    os.makedirs(folder_name)
 
 X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = load_data(
 )
