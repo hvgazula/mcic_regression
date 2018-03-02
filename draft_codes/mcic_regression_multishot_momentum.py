@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-adam optimizer with no hot-start
+adagrad optimizer with no hot-start
 """
 
 import shelve
@@ -33,10 +33,11 @@ def gradient(weights, X, y, lamb=0.0):
 
 
 @jit(nopython=True)
-def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
+def multishot_adagrad(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
                     site_04_y1):
 
-    size_y = site_01_y1.shape[1]
+#    size_y = site_01_y1.shape[1]
+    size_y = 1
 
     params = np.zeros((X1.shape[1], size_y))
     tvalues = np.zeros((X1.shape[1], size_y))
@@ -49,15 +50,10 @@ def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
         y4 = site_04_y1[:, voxel]
 
         # Initialize at remote
-        beta1 = 0.9
-        beta2 = 0.999
-        eps = 1e-8
-        wp = np.zeros(X1.shape[1])
-        mt = np.zeros(X1.shape[1])
-        vt = np.zeros(X1.shape[1])
+        vel_prev = wp = wc = np.zeros(X1.shape[1])
 
-        grad_remote = np.random.rand(X1.shape[1])
-        tol = 1e-8
+        gamma = 0.9
+        tol = 1e-6
         eta = 1e-2
 
         count = 0
@@ -73,18 +69,14 @@ def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
             # at remote
             grad_remote = grad_local1 + grad_local2 + grad_local3 + grad_local4
 
-            mt = beta1 * mt + (1 - beta1) * grad_remote
-            vt = beta2 * vt + (1 - beta2) * (grad_remote**2)
+            vel = gamma * vel_prev + eta * grad_remote
+            wc = wc - vel
 
-            m = mt / (1 - beta1**count)
-            v = vt / (1 - beta2**count)
-
-            wc = wp - eta * m / (np.sqrt(v) + eps)
-
+            print(np.linalg.norm(wc - wp))
             if np.linalg.norm(wc - wp) <= tol:
                 break
 
-            wp = wc
+            vel_prev = vel
 
         print(voxel, count)
 
@@ -140,15 +132,16 @@ def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
     return (params, tvalues, rsquared, dof_global)
 
 
-folder_index = input('Enter the name of the folder to save results: ')
-folder_name = folder_index.replace(' ', '_')
+#folder_index = input('Enter the name of the folder to save results: ')
+#folder_name = folder_index.replace(' ', '_')
+folder_name = 'test'
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
 X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = load_data(
 )
 
-(params, tvalues, rsquared, dof_global) = multishot_gd(
+(params, tvalues, rsquared, dof_global) = multishot_adagrad(
     X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1)
 
 ps_global = 2 * sp.stats.t.sf(np.abs(tvalues), dof_global)
@@ -160,7 +153,7 @@ rsquared = pd.DataFrame(rsquared.transpose(), columns=['rsquared_adj'])
 # %% Write to a file
 print('Writing data to a shelve file')
 results = shelve.open(
-    os.path.join(folder_name, 'multishot_results_adam'))
+    os.path.join(folder_name, 'multishot_results_adagrad'))
 results['params'] = params
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
