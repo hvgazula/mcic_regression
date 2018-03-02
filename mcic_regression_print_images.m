@@ -11,7 +11,7 @@ function mcic_regression_print_images()
 % for the decentralized images are same as their centralized counterparts
 
 working_folder = input('Please Enter the Folder with output NIfTI files: ', 's');
-working_folder = fullfile(pwd, working_folder);
+working_folder = fullfile(pwd, working_folder, 'images');
 
 template_file = fullfile(working_folder, 'MNI152_T1_1mm_brain.nii');
 
@@ -22,11 +22,11 @@ if exist(fullfile(working_folder, 'MNI152*.nii'), 'file') ~= 2
     system(shell_cmd);
 end
 
-data_location = '/export/mialab/users/hgazula/mcic_regression';
-mask_location = fullfile(data_location, 'mask');
+data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data';
+mask_location = fullfile(data_location, 'mask_resampled');
 
 % Mask Location
-Mask = fullfile(mask_location, 'mask.nii');
+Mask = fullfile(mask_location, 'mask_4mm.nii');
 
 % Extract data relevant to regressors (age and diagnosis)
 diagnosis_files = dir(fullfile(working_folder, 'pvalues_diagnosis_Patient_*.nii'));
@@ -62,6 +62,6 @@ for i = 1 : length(files)
             'units'         , '-log_1_0 (p-value)');
     end
     [~, curr_file_name] = fileparts(current_file);
-    eval(['export_fig ' fullfile(working_folder, curr_file_name) '.png  -nocrop']);
+    eval(['export_fig ' fullfile(working_folder, '..', 'processed_images', curr_file_name) '.png  -nocrop']);
     
 end
