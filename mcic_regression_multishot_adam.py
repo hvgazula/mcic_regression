@@ -57,7 +57,6 @@ def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
         mt = np.zeros(X1.shape[1])
         vt = np.zeros(X1.shape[1])
 
-        grad_remote = np.random.rand(X1.shape[1])
         tol = 1e-8
         eta = 1e-2
 
