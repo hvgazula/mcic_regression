@@ -33,7 +33,7 @@ def get_dummies_and_augment(site_X):
 
 def load_data():
 
-    with open("final_data_resampled.pkl", "rb") as f:
+    with open("final_data.pkl", "rb") as f:
         demographics, voxels = pickle.load(f)
 
     FinalData = pd.concat([demographics, voxels], axis=1)

@@ -25,6 +25,7 @@ def multishot_exact(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
     size_y = site_01_y1.shape[1]
 
     params = np.zeros((X1.shape[1], size_y))
+    sse = np.zeros(size_y)
     tvalues = np.zeros((X1.shape[1], size_y))
     rsquared = np.zeros(size_y)
 
@@ -85,6 +86,7 @@ def multishot_exact(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
 
         # PART 05 - Finding rsquared (global)
         SSE_global = sse1 + sse2 + sse3 + sse4
+        sse[voxel] = SSE_global
         SST_global = sst1 + sst2 + sst3 + sst4
         r_squared_global = 1 - (SSE_global / SST_global)
         rsquared[voxel] = r_squared_global
@@ -100,23 +102,23 @@ def multishot_exact(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
 
         tvalues[:, voxel] = ts_global
 
-    return (params, tvalues, rsquared, dof_global)
+    return (params, sse, tvalues, rsquared, dof_global)
 
 
-#folder_index = input('Enter the name of the folder to save results: ')
-#folder_name = folder_index.replace(' ', '_')
-folder_name = 'test'
+folder_index = input('Enter the name of the folder to save results: ')
+folder_name = folder_index.replace(' ', '_')
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
 X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1, column_name_list = load_data(
 )
 
-(params, tvalues, rsquared, dof_global) = multishot_exact(
+(params, sse, tvalues, rsquared, dof_global) = multishot_exact(
     X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1)
 
 ps_global = 2 * sp.stats.t.sf(np.abs(tvalues), dof_global)
 pvalues = pd.DataFrame(ps_global.transpose(), columns=column_name_list)
+sse = pd.DataFrame(sse.transpose(), columns=['sse'])
 params = pd.DataFrame(params.transpose(), columns=column_name_list)
 tvalues = pd.DataFrame(tvalues.transpose(), columns=column_name_list)
 rsquared = pd.DataFrame(rsquared.transpose(), columns=['rsquared_adj'])
@@ -124,8 +126,9 @@ rsquared = pd.DataFrame(rsquared.transpose(), columns=['rsquared_adj'])
 # %% Writing to a file
 print('Writing data to a shelve file')
 results = shelve.open(
-    os.path.join(folder_name, 'multishot_results_Exact_resampled'))
+    os.path.join(folder_name, 'multishotExact_results'))
 results['params'] = params
+results['sse'] = sse
 results['pvalues'] = pvalues
 results['tvalues'] = tvalues
 results['rsquared'] = rsquared
