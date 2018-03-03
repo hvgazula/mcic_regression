@@ -22,8 +22,8 @@ if not os.path.exists(images_folder):
 
 # %% Head Directory where the data is stored and loading the mask
 data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
-mask_location = os.path.join(data_location, 'mask_resampled')
-mask = nib.load(os.path.join(mask_location, 'mask_4mm.nii'))
+mask_location = os.path.join(data_location, 'mask')
+mask = nib.load(os.path.join(mask_location, 'mask.nii'))
 
 # %% Converting the data to NIfTI format
 for file in os.listdir(folder_name):
@@ -35,13 +35,17 @@ for file in os.listdir(folder_name):
             print(key)
             for column in my_dict[key].columns.tolist():
                 image_string_sequence = (
-                    key, column, file.split('_')[0] + file.split('_')[2])
+                    key, column, file.split('.')[0])
                 image_string = '_'.join(image_string_sequence) + '.nii'
                 new_data = np.zeros(mask.shape)
+
                 if key == 'pvalues':
                     new_data[mask.get_data() >
                              0] = -1 * np.log10(my_dict[key][
                                  column]) * np.sign(my_dict['tvalues'][column])
+                else:
+                    new_data[mask.get_data() > 0] = my_dict[key][column]
+
                 clipped_img = nib.Nifti1Image(new_data, mask.affine,
                                               mask.header)
                 print('Saving ', image_string)
