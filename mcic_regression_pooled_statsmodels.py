@@ -25,7 +25,7 @@ if not os.path.exists(folder_name):
 with open("final_data.pkl", "rb") as f:
     demographics, voxels = pickle.load(f)
 
-demographics.drop('site', axis=1, inplace=True)
+# demographics.drop('site', axis=1, inplace=True)
 
 # %% Statistical Analysis
 X = pd.get_dummies(demographics, drop_first=True)  # Creating Dummies
