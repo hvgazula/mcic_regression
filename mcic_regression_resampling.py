@@ -31,7 +31,8 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
         if os.path.isfile(os.path.join(images_location, f))
     ])
 
-    folder_tag = '_resampled'
+    voxel_size_str = '_{:.0f}mm'.format(float(voxel_dimensions[0]))
+    folder_tag = ''.join(['resampled', voxel_size_str])
     new_folder = images_location + folder_tag
 
     if not os.path.exists(new_folder):
@@ -40,7 +41,7 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
     for image_file in image_files:
         print(image_file)
         (file_name, file_ext) = os.path.splitext(image_file)
-        new_file_name = file_name + '_4mm' + file_ext
+        new_file_name = ''.join([file_name, voxel_size_str, file_ext])
 
         resample = afni.Resample()
         resample.inputs.environ = {'AFNI_NIFTI_TYPE_WARN': 'NO'}
@@ -57,7 +58,7 @@ mask_location = os.path.join(data_location, 'mask')
 patient_images_location = os.path.join(data_location, 'group1_patients')
 control_images_location = os.path.join(data_location, 'group2_controls')
 
-voxel_size = (4.0, 4.0, 4.0)
+voxel_size = (6.0, 6.0, 6.0)
 
 resample_nifti_images(mask_location, voxel_size, 'NN')
 resample_nifti_images(patient_images_location, voxel_size, 'Li')
