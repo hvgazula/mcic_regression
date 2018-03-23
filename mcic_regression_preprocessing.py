@@ -27,8 +27,6 @@ def nifti_to_data(image_files_location, mask_array):
         List of numpy arrays from each NIfTI file
 
     """
-    appended_data = []
-
     # List all files
     image_files = sorted([
         f for f in os.listdir(image_files_location)
@@ -36,11 +34,13 @@ def nifti_to_data(image_files_location, mask_array):
     ])
 
     # Extract Data (after applying mask)
-    for image in image_files:
-        print(image)
-        image_data = nib.load(
-            os.path.join(image_files_location, image)).get_data()
-        appended_data.append(image_data[mask_array > 0])
+    def extract_data(x, y):
+        return nib.load(x).get_data()[y > 0]
+
+    appended_data = [
+        extract_data(os.path.join(image_files_location, image), mask_array)
+        for image in image_files
+    ]
 
     return appended_data
 
