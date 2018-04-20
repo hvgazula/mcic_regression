@@ -23,10 +23,10 @@ if exist(fullfile(working_folder, 'MNI152*.nii'), 'file') ~= 2
 end
 
 data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data';
-mask_location = fullfile(data_location, 'mask_resampled');
+mask_location = fullfile(data_location, 'mask');
 
 % Mask Location
-Mask = fullfile(mask_location, 'mask_4mm.nii');
+Mask = fullfile(mask_location, 'mask.nii');
 
 % Extract data relevant to regressors (age and diagnosis)
 diagnosis_files = dir(fullfile(working_folder, 'pvalues_diagnosis_Patient_*.nii'));
@@ -46,19 +46,31 @@ function print_images(files, template_file, Mask, working_folder)
 for i = 1 : length(files)
     disp(files(i).name)
     
+    % what's really happening here
+    for i = 1 : length(files)
+        current_file    = fullfile(working_folder, files(i).name);
+        p[:,i]          = icatb_read_data(current_file, [], Mask)';
+    end
+    
+    thresholdh = max(max(abs(p)));
+    thresholdhl = max(max(abs(p))) * 0.5;
+    
+    
     current_file    = fullfile(working_folder, files(i).name);
-    p               = icatb_read_data(current_file, [], Mask)';
-    pID             = fnctb_fdr(10.^-abs(p), 0.05);
+    % p               = icatb_read_data(current_file, [], Mask)';
+    % pID             = fnctb_fdr(10.^-abs(p), 0.05);
     [fname, ~]      = mci_interp2struct(current_file, 1, template_file);
     
     if exist('slices', 'var')
         [slices, ~] = mci_makeimage(fname, template_file, 1,...
             'slicemethod'   , slices, ...
-            'threshold_low' , -log10(pID),...
+            'threshold_low' , thresholdl,...
+			'threshold_high' , thresholdh,...
             'units'         , '-log_1_0 (p-value)');
     else
         [slices, ~] = mci_makeimage(fname, template_file, 1, ...
-            'threshold_low' , -log10(pID),...
+            'threshold_low' , thresholdl,...
+			'threshold_high' , thresholdh,...
             'units'         , '-log_1_0 (p-value)');
     end
     [~, curr_file_name] = fileparts(current_file);
