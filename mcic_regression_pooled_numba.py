@@ -24,11 +24,12 @@ def pooled_exact(X, y):
     sse = np.zeros(size_y)
     tvalues = np.zeros((X.shape[1], size_y))
     rsquared = np.zeros(size_y)
+    proj = np.linalg.inv(X.T @ X) @ X.T
 
     for voxel in prange(size_y):
         print(voxel)
         curr_y = y[:, voxel]
-        beta_vector = np.linalg.inv(X.T @ X) @ (X.T @ curr_y)
+        beta_vector = proj @ curr_y
         params[:, voxel] = beta_vector
 
         curr_y_estimate = np.dot(beta_vector, X.T)
