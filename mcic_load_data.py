@@ -13,6 +13,7 @@ import statsmodels.api as sm
 
 def select_and_drop_cols(site_dummy, site_data):
     """Select and crop columns"""
+    # uncomment the commented lines and comment the one between to run multi-shot
     #    select_column_list = [
     #        'age', 'site_MGH', 'site_UMN', 'site_UNM', 'diagnosis', 'sex'
     #    ]
