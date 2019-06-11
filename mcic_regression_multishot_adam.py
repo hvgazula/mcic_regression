@@ -71,7 +71,10 @@ def multishot_gd(X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4,
             grad_local4 = gradient(wp, X4, y4, lamb=0)
 
             # at remote
-            grad_remote = grad_local1 + grad_local2 + grad_local3 + grad_local4
+#            grad_remote = grad_local1 + grad_local2 + grad_local3 + grad_local4
+            grad_remote = (len(y1) * grad_local1 + len(y2) * grad_local2 +
+               len(y3) * grad_local3 + len(y4) * grad_local4) / (
+                   len(y1) + len(y2) + len(y3) + len(y4))
 
             mt = beta1 * mt + (1 - beta1) * grad_remote
             vt = beta2 * vt + (1 - beta2) * (grad_remote**2)
