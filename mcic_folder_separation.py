@@ -9,6 +9,7 @@ from shutil import copy
 import json
 import os
 import pandas as pd
+from mcic_classes import CovarInfo, DataLocationInfo
 
 
 def extract_demographic_info(csv_file):
@@ -23,11 +24,11 @@ def extract_demographic_info(csv_file):
     return demographic_info
 
 
-def load_covariate_strings(value, destination, folder, demographics, flag):
+#pylint: disable=too-many-arguments
+def load_covariate_strings(cinfo, value, destination, folder, demographics,
+                           flag):
     """Returns a list with the covariate vector for each subject
     """
-    cinfo = CovarInfo()
-
     inputspec_list = []
 
     image_files = return_files(folder)
@@ -59,118 +60,77 @@ def return_files(folder):
     ])
 
 
-class CovarInfo():
-    """Contains information related to covariates
-    """
+def write_inputspec(spec_file, spec_list, cinfo):
+    """Template function to write inputspec.json"""
+    with open(spec_file, 'w') as file_h:
+        file_h.write('{')
+        file_h.write('''"covariates": {
+    "value": [\n''')
+        file_h.write('''[[''')
+        file_h.write('[' +
+                     ','.join('"{}"'.format(x)
+                              for x in ['niftifile', *cinfo.covar_list]) +
+                     '],\n')
+        file_h.write(',\n'.join(json.dumps(x) for x in spec_list))
+        file_h.write('''\n],]\n''')
+        file_h.write('[' + ','.join('"{}"'.format(x)
+                                    for x in cinfo.covar_list) + '],\n')
+        file_h.write('[' + ','.join('"{}"'.format(x)
+                                    for x in cinfo.covar_types) + ']\n')
 
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self):
-        self.data_location = '/Users/hgazula/Downloads/mcic_regression/mcic_data'
-        self.demographics_folder_name = 'demographics'
-        self.patients_folder_name = 'group1_patients_4mm'
-        self.controls_folder_name = 'group2_controls_4mm'
-        self.patients_csv_file = 'patients.csv'
-        self.controls_csv_file = 'controls.csv'
-        self.output_folder = 'coinstac_data4'
-        self.num_extra_covars = 0
-
-        self.demographics_location = None
-        self.patient_images_folder = None
-        self.control_images_folder = None
-
-        self.extra_covars = None
-        self.covar_list = None
-        self.extra_covar_types = None
-        self.covar_types = None
-
-    def createpaths(self):
-        """Created full paths to required folders
-        """
-        self.demographics_location = os.path.join(
-            self.data_location, self.demographics_folder_name)
-        self.patient_images_folder = os.path.join(self.data_location,
-                                                  self.patients_folder_name)
-        self.control_images_folder = os.path.join(self.data_location,
-                                                  self.controls_folder_name)
-
-    def create_covars(self):
-        """Creates necessary details for extra covariates
-        """
-        self.extra_covars = [
-            'var{}'.format(x) for x in range(1, self.num_extra_covars + 1)
-        ]
-        self.covar_list = ["isControl", "age", "sex", *self.extra_covars]
-
-        self.extra_covar_types = ["number"] * self.num_extra_covars
-        self.covar_types = [
-            "boolean", "number", "string", *self.extra_covar_types
-        ]
+        file_h.write(']\n')
+        file_h.write('},\n')
+        file_h.write('''"data": {
+    "value": [\n''')
+        file_h.write('\t [' + ',\n\t'.join('"{}"'.format(l[0])
+                                           for l in spec_list) + '],\n')
+        file_h.write('''[ "niftifile" ]\n''')
+        file_h.write('] \n },\n')
+        file_h.write('''"lambda": {
+    "value": 0 \n''')
+        file_h.write('''}\n''')
+        file_h.write('''}\n''')
 
 
 def main():
     """This is where the program starts
     """
-    pathinfo = CovarInfo()
+    covar_info = CovarInfo(0)
+    path_info = DataLocationInfo()
 
     patient_demographics = extract_demographic_info(
-        os.path.join(pathinfo.demographics_location,
-                     pathinfo.patients_csv_file))
+        os.path.join(path_info.demographics_location,
+                     path_info.patients_csv_file))
     control_demographics = extract_demographic_info(
-        os.path.join(pathinfo.demographics_location,
-                     pathinfo.controls_csv_file))
+        os.path.join(path_info.demographics_location,
+                     path_info.controls_csv_file))
 
-    if not os.path.exists(pathinfo.output_folder):
-        os.makedirs(pathinfo.output_folder)
+    if not os.path.exists(path_info.output_folder):
+        os.makedirs(path_info.output_folder)
 
     site_list = ['M02', 'M52', 'M55', 'M87']
 
     for index, site_id in enumerate(site_list):
-        destination_folder = os.path.join(pathinfo.output_folder,
+        destination_folder = os.path.join(path_info.output_folder,
                                           '{:02d}'.format(index),
                                           'simulatorRun')
         if not os.path.exists(destination_folder):
             os.makedirs(destination_folder)
 
-        patient_spec = load_covariate_strings(site_id, destination_folder,
-                                              pathinfo.patient_images_folder,
+        patient_spec = load_covariate_strings(covar_info, site_id,
+                                              destination_folder,
+                                              path_info.patient_images_folder,
                                               patient_demographics, False)
-        control_spec = load_covariate_strings(site_id, destination_folder,
-                                              pathinfo.control_images_folder,
+        control_spec = load_covariate_strings(covar_info, site_id,
+                                              destination_folder,
+                                              path_info.control_images_folder,
                                               control_demographics, True)
 
         inputspec_list = [*patient_spec, *control_spec]
 
         inputspec_file = os.path.join(destination_folder,
                                       'inputspec{:02d}.json'.format(index))
-
-        with open(inputspec_file, 'w') as file_h:
-            file_h.write('{')
-            file_h.write('''"covariates": {
-        "value": [\n''')
-            file_h.write('''[[''')
-            file_h.write('[' + ','.join(
-                '"{}"'.format(x)
-                for x in ['niftifile', *pathinfo.covar_list]) + '],\n')
-            file_h.write(',\n'.join(json.dumps(x) for x in inputspec_list))
-            file_h.write('''\n],]\n''')
-            file_h.write('[' + ','.join('"{}"'.format(x)
-                                        for x in pathinfo.covar_list) + '],\n')
-            file_h.write('[' + ','.join('"{}"'.format(x)
-                                        for x in pathinfo.covar_types) + ']\n')
-
-            file_h.write(']\n')
-            file_h.write('},\n')
-            file_h.write('''"data": {
-        "value": [\n''')
-            file_h.write('\t [' + ',\n\t'.join('"{}"'.format(l[0])
-                                               for l in inputspec_list) +
-                         '],\n')
-            file_h.write('''[ "niftifile" ]\n''')
-            file_h.write('] \n },\n')
-            file_h.write('''"lambda": {
-        "value": 0 \n''')
-            file_h.write('''}\n''')
-            file_h.write('''}\n''')
+        write_inputspec(inputspec_file, inputspec_list, covar_info)
 
 
 if __name__ == '__main__':

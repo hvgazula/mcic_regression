@@ -11,6 +11,7 @@ Created on Fri Jan 26 15:16:57 2018
 
 import os
 from nipype.interfaces import afni
+from mcic_classes import DataLocationInfo
 
 
 def resample_nifti_images(images_location, voxel_dimensions, resample_method):
@@ -53,13 +54,11 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
         resample.run()
 
 
-data_location = '/export/mialab/users/hgazula/mcic_regression/mcic_data'
-mask_location = os.path.join(data_location, 'mask')
-patient_images_location = os.path.join(data_location, 'group1_patients')
-control_images_location = os.path.join(data_location, 'group2_controls')
-
-voxel_size = (6.0, 6.0, 6.0)
-
-resample_nifti_images(mask_location, voxel_size, 'NN')
-resample_nifti_images(patient_images_location, voxel_size, 'Li')
-resample_nifti_images(control_images_location, voxel_size, 'Li')
+if __name__ == '__main__':
+    voxel_size = (4.0, 4.0, 4.0)
+    
+    data_info = DataLocationInfo()
+    
+    resample_nifti_images(data_info.mask_location, voxel_size, 'NN')
+    resample_nifti_images(data_info.patient_images_location, voxel_size, 'Li')
+    resample_nifti_images(data_info.control_images_location, voxel_size, 'Li')
