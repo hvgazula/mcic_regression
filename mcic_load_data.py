@@ -11,14 +11,18 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def select_and_drop_cols(site_dummy, site_data):
+def select_and_drop_cols(site_dummy, site_data, flag):
     """Select and crop columns"""
-    # uncomment the commented lines and comment the one between to run multi-shot
-    #    select_column_list = [
-    #        'age', 'site_MGH', 'site_UMN', 'site_UNM', 'diagnosis', 'sex'
-    #    ]
-    select_column_list = ['age', 'diagnosis', 'sex']
-    #    site_data = site_dummy.merge(site_data, on='site', how='right')
+    if flag == 'multishot':
+        select_column_list = [
+            'age', 'site_MGH', 'site_UMN', 'site_UNM', 'diagnosis', 'sex'
+        ]
+        site_data = site_dummy.merge(site_data, on='site', how='right')
+    elif flag == 'singleshot':
+        select_column_list = ['age', 'diagnosis', 'sex']
+    else:
+        print('so such algorithm exists')
+
     site_data = site_data.drop('site', axis=1)
     site_X = site_data[select_column_list]
     site_y = site_data.drop(select_column_list, axis=1)
@@ -32,52 +36,48 @@ def get_dummies_and_augment(site_X):
     return X
 
 
-def load_data():
-
-    with open("final_data.pkl", "rb") as f:
-        demographics, voxels = pickle.load(f)
-
-    FinalData = pd.concat([demographics, voxels], axis=1)
-
-    site_01 = FinalData[FinalData['site'].str.match('IA')]
-    site_02 = FinalData[FinalData['site'].str.match('MGH')]
-    site_03 = FinalData[FinalData['site'].str.match('UMN')]
-    site_04 = FinalData[FinalData['site'].str.match('UNM')]
-
-    # send the total number of sites information to each site (Remote)
-    unique_sites = FinalData['site'].unique()
-    unique_sites.sort()
-    site_dummy = pd.get_dummies(unique_sites, drop_first=True)
-    site_dummy.set_index(unique_sites, inplace=True)
-    site_dummy = site_dummy.add_prefix('site_')
-    site_dummy['site'] = site_dummy.index
-
-    site_01_X, site_01_y = select_and_drop_cols(site_dummy, site_01)
-    site_02_X, site_02_y = select_and_drop_cols(site_dummy, site_02)
-    site_03_X, site_03_y = select_and_drop_cols(site_dummy, site_03)
-    site_04_X, site_04_y = select_and_drop_cols(site_dummy, site_04)
-
-    site_01_y1 = site_01_y.values
-    site_02_y1 = site_02_y.values
-    site_03_y1 = site_03_y.values
-    site_04_y1 = site_04_y.values
-
-    X1 = get_dummies_and_augment(site_01_X)
-    X2 = get_dummies_and_augment(site_02_X)
-    X3 = get_dummies_and_augment(site_03_X)
-    X4 = get_dummies_and_augment(site_04_X)
-
-    column_name_list = X1.columns.tolist()
-
+def some_manipulation(data, site, site_dummy, algo):
+    """I really dont kniw what' happening here"""
+    site_data = data[data['site'].str.match(site)]
+    site_X, site_y = select_and_drop_cols(site_dummy, site_data, algo)
+    site_y1 = site_y.values
+    X1 = get_dummies_and_augment(site_X)
+    column_list = X1.columns.tolist()
     X1 = X1.values
-    X2 = X2.values
-    X3 = X3.values
-    X4 = X4.values
+    site_y1 = site_y1.astype('float64')
 
-    site_01_y1 = site_01_y1.astype('float64')
-    site_02_y1 = site_02_y1.astype('float64')
-    site_03_y1 = site_03_y1.astype('float64')
-    site_04_y1 = site_04_y1.astype('float64')
+    return X1, site_y1, column_list
+
+
+def gather_dummy_info(data):
+    """same here don't know"""
+    # send the total number of sites information to each site (Remote)
+    unique_sites = data['site'].unique()
+    unique_sites.sort()
+    dummy = pd.get_dummies(unique_sites, drop_first=True)
+    dummy.set_index(unique_sites, inplace=True)
+    dummy = dummy.add_prefix('site_')
+    dummy['site'] = dummy.index
+
+    return dummy
+
+
+def load_data():
+    """Loads the pickle file and prepares it for further processing
+    """
+    with open("final_data.pkl", "rb") as file_h:
+        demographics, voxels = pickle.load(file_h)
+
+    final_data = pd.concat([demographics, voxels], axis=1)
+
+    site_dummy = gather_dummy_info(final_data)
+
+    shot = 'singleshot'
+    X1, site_01_y1, column_name_list = some_manipulation(
+        final_data, 'IA', site_dummy, shot)
+    X2, site_02_y1, _ = some_manipulation(final_data, 'MGH', site_dummy, shot)
+    X3, site_03_y1, _ = some_manipulation(final_data, 'UMN', site_dummy, shot)
+    X4, site_04_y1, _ = some_manipulation(final_data, 'UNM', site_dummy, shot)
 
     return (X1, site_01_y1, X2, site_02_y1, X3, site_03_y1, X4, site_04_y1,
             column_name_list)
