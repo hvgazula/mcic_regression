@@ -72,7 +72,7 @@ def write_inputspec(spec_file, spec_list, cinfo):
                               for x in ['niftifile', *cinfo.covar_list]) +
                      '],\n')
         file_h.write(',\n'.join(json.dumps(x) for x in spec_list))
-        file_h.write('''\n],]\n''')
+        file_h.write('''\n]],\n''')
         file_h.write('[' + ','.join('"{}"'.format(x)
                                     for x in cinfo.covar_list) + '],\n')
         file_h.write('[' + ','.join('"{}"'.format(x)
