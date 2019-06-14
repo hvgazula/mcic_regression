@@ -54,10 +54,9 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
 
 
 if __name__ == '__main__':
-    voxel_size = (4.0, 4.0, 4.0)
-    
-    data_info = DataLocationInfo()
-    
-    resample_nifti_images(data_info.mask_location, voxel_size, 'NN')
-    resample_nifti_images(data_info.patient_images_folder, voxel_size, 'Li')
-    resample_nifti_images(data_info.control_images_folder, voxel_size, 'Li')
+    VOXEL_SIZE = (4.0, 4.0, 4.0)
+    DATA_INFO = DataLocationInfo()
+
+    resample_nifti_images(DATA_INFO.mask_location, VOXEL_SIZE, 'NN')
+    resample_nifti_images(DATA_INFO.patient_images_folder, VOXEL_SIZE, 'Li')
+    resample_nifti_images(DATA_INFO.control_images_folder, VOXEL_SIZE, 'Li')
