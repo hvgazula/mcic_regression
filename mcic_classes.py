@@ -15,6 +15,7 @@ class DataLocationInfo:
     """Contains information related to data paths
     """
     data_location: str = '/Users/hgazula/Downloads/mcic_regression/mcic_data'
+    mask_folder_name: str = 'mask'
     demographics_folder_name: str = 'demographics'
     patients_folder_name: str = 'group1_patients'
     controls_folder_name: str = 'group2_controls'
@@ -28,7 +29,8 @@ class DataLocationInfo:
     mask_location: str = ''
 
     def __post_init__(self):
-        self.mask_location = os.path.join(self.data_location, 'mask')
+        self.mask_location = os.path.join(self.data_location,
+                                          self.mask_folder_name)
         self.demographics_location = os.path.join(
             self.data_location, self.demographics_folder_name)
         self.patient_images_folder = os.path.join(self.data_location,

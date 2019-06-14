@@ -60,7 +60,7 @@ def return_files(folder):
     ])
 
 
-def write_inputspec(spec_file, spec_list, cinfo):
+def write_local_inputspec(spec_file, spec_list, cinfo):
     """Template function to write inputspec.json"""
     with open(spec_file, 'w') as file_h:
         file_h.write('{')
@@ -110,9 +110,10 @@ def main():
 
     site_list = ['M02', 'M52', 'M55', 'M87']
 
+    data = []
     for index, site_id in enumerate(site_list):
         destination_folder = os.path.join(path_info.output_folder,
-                                          '{:02d}'.format(index),
+                                          'local{:01d}'.format(index),
                                           'simulatorRun')
         if not os.path.exists(destination_folder):
             os.makedirs(destination_folder)
@@ -130,7 +131,15 @@ def main():
 
         inputspec_file = os.path.join(destination_folder,
                                       'inputspec{:02d}.json'.format(index))
-        write_inputspec(inputspec_file, inputspec_list, covar_info)
+        write_local_inputspec(inputspec_file, inputspec_list, covar_info)
+
+        with open(inputspec_file, 'rb') as file_h:
+            data.append(json.load(file_h))
+
+    global_inputspec_file = os.path.join(path_info.output_folder,
+                                         'inputspec.json')
+    with open(global_inputspec_file, 'w') as fwrite_h:
+        json.dump(data, fwrite_h, indent=1)
 
 
 if __name__ == '__main__':
