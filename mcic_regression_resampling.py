@@ -60,5 +60,5 @@ if __name__ == '__main__':
     data_info = DataLocationInfo()
     
     resample_nifti_images(data_info.mask_location, voxel_size, 'NN')
-    resample_nifti_images(data_info.patient_images_location, voxel_size, 'Li')
-    resample_nifti_images(data_info.control_images_location, voxel_size, 'Li')
+    resample_nifti_images(data_info.patient_images_folder, voxel_size, 'Li')
+    resample_nifti_images(data_info.control_images_folder, voxel_size, 'Li')
