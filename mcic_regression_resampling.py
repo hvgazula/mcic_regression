@@ -33,8 +33,7 @@ def resample_nifti_images(images_location, voxel_dimensions, resample_method):
     ])
 
     voxel_size_str = '_{:.0f}mm'.format(float(voxel_dimensions[0]))
-    folder_tag = ''.join(['resampled', voxel_size_str])
-    new_folder = images_location + folder_tag
+    new_folder = images_location + voxel_size_str
 
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
